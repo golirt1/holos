@@ -135,8 +135,20 @@ impl Hypervector {
     }
 
     #[inline]
-    fn get_bit(&self, i: usize) -> u64 {
+    pub(crate) fn get_bit(&self, i: usize) -> u64 {
         (self.words[i / 64] >> (i % 64)) & 1
+    }
+
+    /// (crate-internal) set the bit at `pos` to 1.
+    #[inline]
+    pub(crate) fn set_bit(&mut self, pos: usize) {
+        self.words[pos / 64] |= 1u64 << (pos % 64);
+    }
+
+    /// (crate-internal) flip the bit at `pos`.
+    #[inline]
+    pub(crate) fn flip(&mut self, pos: usize) {
+        self.words[pos / 64] ^= 1u64 << (pos % 64);
     }
 }
 

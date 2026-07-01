@@ -97,8 +97,8 @@ name, sim = mem.cleanup(bound.bind(role), threads=8)   # ("value", ~1.0)
 ```
 holos/
 ├── holos_core/          # the engine (Rust, zero dependencies)
-│   ├── src/             #   rng · bsc (bit-packed) · memory (cleanup) · map
-│   └── examples/        #   memoria (cleanup), dolar_de_mexico (analogy), bench
+│   ├── src/             #   rng · bsc (bit-packed) · memory (cleanup) · map · encoder · classifier
+│   └── examples/        #   memoria, dolar_de_mexico, clasificador, bench
 ├── holos_py/            # Python bindings (PyO3 + maturin)
 ├── prototipo_py/        # NumPy reference prototypes (ground truth + benchmarks)
 ├── .github/workflows/   # CI: fmt/clippy/test + build wheels (linux/mac/win) + PyPI publish
@@ -108,8 +108,9 @@ holos/
 
 ## Status & roadmap
 
-Working: native BSC + MAP algebra, associative-memory cleanup (serial + parallel), Python
-bindings, CI, benchmarks. Next (see [design doc](HOLOS_investigacion_tecnica.md) §15):
+Working: native BSC + MAP algebra, associative-memory cleanup (serial + parallel + batched),
+serialization (save/load), a `LevelEncoder` and a one-shot `Classifier` (train = counting bits),
+Python bindings, CI, benchmarks. Next (see [design doc](HOLOS_investigacion_tecnica.md) §15):
 
 - Trainable / adaptive **encoders** — the field's central open problem, and the path to closing
   the accuracy gap with deep learning.

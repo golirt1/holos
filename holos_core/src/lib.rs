@@ -25,10 +25,14 @@
 #![forbid(unsafe_code)]
 
 mod bsc;
+mod classifier;
+mod encoder;
 pub mod map;
 mod memory;
 mod rng;
 
 pub use bsc::{bundle, permute, Hypervector};
+pub use classifier::Classifier;
+pub use encoder::LevelEncoder;
 pub use memory::ItemMemory;
 pub use rng::Rng;
