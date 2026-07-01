@@ -106,6 +106,34 @@ impl Hypervector {
         out
     }
 
+    /// Serialize to a compact byte buffer: `d` (u64 LE) followed by the packed words.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut out = Vec::with_capacity(8 + self.words.len() * 8);
+        out.extend_from_slice(&(self.d as u64).to_le_bytes());
+        for w in &self.words {
+            out.extend_from_slice(&w.to_le_bytes());
+        }
+        out
+    }
+
+    /// Deserialize a hypervector produced by [`Hypervector::to_bytes`].
+    pub fn from_bytes(bytes: &[u8]) -> Option<Hypervector> {
+        if bytes.len() < 8 {
+            return None;
+        }
+        let d = u64::from_le_bytes(bytes[0..8].try_into().ok()?) as usize;
+        let nw = Self::n_words(d);
+        if bytes.len() != 8 + nw * 8 {
+            return None;
+        }
+        let mut words = Vec::with_capacity(nw);
+        for k in 0..nw {
+            let off = 8 + k * 8;
+            words.push(u64::from_le_bytes(bytes[off..off + 8].try_into().ok()?));
+        }
+        Some(Hypervector { d, words })
+    }
+
     #[inline]
     fn get_bit(&self, i: usize) -> u64 {
         (self.words[i / 64] >> (i % 64)) & 1
@@ -210,5 +238,13 @@ mod tests {
         let n = a.add_noise(0.25, &mut rng);
         // ~25% flips -> similarity ~0.5 (allowing for repeated positions)
         assert!(n.similarity(&a) > 0.4 && n.similarity(&a) < 0.6);
+    }
+
+    #[test]
+    fn serialize_roundtrip() {
+        let mut rng = Rng::new(15);
+        let a = Hypervector::random(D, &mut rng);
+        let b = Hypervector::from_bytes(&a.to_bytes()).unwrap();
+        assert_eq!(a, b);
     }
 }

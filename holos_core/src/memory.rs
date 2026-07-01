@@ -142,6 +142,84 @@ impl ItemMemory {
             .map(|(i, h)| (self.names[i].as_str(), self.sim(h)))
             .collect()
     }
+
+    /// Nearest item for each of many queries, parallelized **across queries**.
+    /// Spawns the threads once for the whole batch, so parallelism actually pays off
+    /// (unlike calling `nearest_parallel` per query).
+    pub fn nearest_batch(
+        &self,
+        queries: &[Hypervector],
+        threads: usize,
+    ) -> Vec<Option<(usize, f64)>> {
+        if queries.is_empty() {
+            return Vec::new();
+        }
+        let threads = threads.max(1).min(queries.len());
+        let chunk = queries.len().div_ceil(threads);
+        let chunks: Vec<&[Hypervector]> = queries.chunks(chunk).collect();
+        let partials: Vec<Vec<Option<(usize, f64)>>> = std::thread::scope(|s| {
+            let handles: Vec<_> = chunks
+                .iter()
+                .map(|qc| s.spawn(move || qc.iter().map(|q| self.nearest(q)).collect::<Vec<_>>()))
+                .collect();
+            handles.into_iter().map(|h| h.join().unwrap()).collect()
+        });
+        partials.concat()
+    }
+
+    /// Like [`ItemMemory::cleanup`] but returns `None` when the best match is below
+    /// `min_similarity` — i.e. "this doesn't match anything I know".
+    pub fn cleanup_threshold(
+        &self,
+        query: &Hypervector,
+        min_similarity: f64,
+    ) -> Option<(&str, f64)> {
+        self.cleanup(query).filter(|&(_, s)| s >= min_similarity)
+    }
+
+    /// Serialize the whole memory (names + vectors) to a byte buffer.
+    pub fn save(&self) -> Vec<u8> {
+        let mut out = Vec::new();
+        out.extend_from_slice(b"HOLM"); // magic
+        out.extend_from_slice(&1u32.to_le_bytes()); // format version
+        out.extend_from_slice(&(self.d as u64).to_le_bytes());
+        out.extend_from_slice(&(self.len() as u64).to_le_bytes());
+        for name in &self.names {
+            out.extend_from_slice(&(name.len() as u32).to_le_bytes());
+            out.extend_from_slice(name.as_bytes());
+        }
+        for w in &self.data {
+            out.extend_from_slice(&w.to_le_bytes());
+        }
+        out
+    }
+
+    /// Load a memory produced by [`ItemMemory::save`]. Returns `None` on malformed input.
+    pub fn load(bytes: &[u8]) -> Option<ItemMemory> {
+        let mut p = 0usize;
+        let mut take = |n: usize| -> Option<&[u8]> {
+            let s = bytes.get(p..p + n)?;
+            p += n;
+            Some(s)
+        };
+        if take(4)? != b"HOLM" {
+            return None;
+        }
+        let _version = u32::from_le_bytes(take(4)?.try_into().ok()?);
+        let d = u64::from_le_bytes(take(8)?.try_into().ok()?) as usize;
+        let n = u64::from_le_bytes(take(8)?.try_into().ok()?) as usize;
+        let nw = Hypervector::n_words(d);
+        let mut names = Vec::with_capacity(n);
+        for _ in 0..n {
+            let len = u32::from_le_bytes(take(4)?.try_into().ok()?) as usize;
+            names.push(std::str::from_utf8(take(len)?).ok()?.to_string());
+        }
+        let mut data = Vec::with_capacity(n * nw);
+        for _ in 0..n * nw {
+            data.push(u64::from_le_bytes(take(8)?.try_into().ok()?));
+        }
+        Some(ItemMemory { d, nw, names, data })
+    }
 }
 
 #[cfg(test)]
@@ -177,5 +255,45 @@ mod tests {
         }
         let q = Hypervector::random(D, &mut rng);
         assert_eq!(mem.nearest(&q), mem.nearest_parallel(&q, 4));
+    }
+
+    #[test]
+    fn batch_matches_per_query() {
+        let mut rng = Rng::new(8);
+        let mut mem = ItemMemory::new(D);
+        for i in 0..200 {
+            mem.add(format!("s{i}"), &Hypervector::random(D, &mut rng));
+        }
+        let queries: Vec<Hypervector> = (0..50).map(|_| Hypervector::random(D, &mut rng)).collect();
+        let batch = mem.nearest_batch(&queries, 4);
+        let one_by_one: Vec<_> = queries.iter().map(|q| mem.nearest(q)).collect();
+        assert_eq!(batch, one_by_one);
+    }
+
+    #[test]
+    fn save_load_roundtrip() {
+        let mut rng = Rng::new(9);
+        let mut mem = ItemMemory::new(D);
+        let mut items = Vec::new();
+        for i in 0..100 {
+            let hv = Hypervector::random(D, &mut rng);
+            mem.add(format!("s{i}"), &hv);
+            items.push(hv);
+        }
+        let restored = ItemMemory::load(&mem.save()).unwrap();
+        assert_eq!(restored.len(), mem.len());
+        let noisy = items[42].add_noise(0.2, &mut rng);
+        assert_eq!(restored.cleanup(&noisy).unwrap().0, "s42");
+    }
+
+    #[test]
+    fn threshold_rejects_unknown() {
+        let mut rng = Rng::new(10);
+        let mut mem = ItemMemory::new(D);
+        for i in 0..100 {
+            mem.add(format!("s{i}"), &Hypervector::random(D, &mut rng));
+        }
+        let unknown = Hypervector::random(D, &mut rng); // matches nothing (sim ~0)
+        assert!(mem.cleanup_threshold(&unknown, 0.2).is_none());
     }
 }
