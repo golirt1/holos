@@ -28,11 +28,7 @@ fn main() {
         capital.bind(&washington),
         moneda.bind(&dolar),
     ]);
-    let mex_rec = bundle(&[
-        pais.bind(&mexico),
-        capital.bind(&cdmx),
-        moneda.bind(&peso),
-    ]);
+    let mex_rec = bundle(&[pais.bind(&mexico), capital.bind(&cdmx), moneda.bind(&peso)]);
 
     // Transformation USA <-> Mexico, then ask for the analogue of the dollar.
     let t = usa_rec.bind(&mex_rec);
@@ -53,7 +49,10 @@ fn main() {
     ranked.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
 
     println!("Question: what is the 'dollar of Mexico'?");
-    println!("Answer:   {} (similarity {:+.3})\n", ranked[0].0, ranked[0].1);
+    println!(
+        "Answer:   {} (similarity {:+.3})\n",
+        ranked[0].0, ranked[0].1
+    );
     println!("Ranking:");
     for (n, s) in &ranked {
         println!("  {n:12} {s:+.3}");

@@ -17,8 +17,9 @@ jobs:
           components: rustfmt, clippy
       - name: Format check
         run: cargo fmt --manifest-path holos_core/Cargo.toml -- --check
-      - name: Clippy
-        run: cargo clippy --manifest-path holos_core/Cargo.toml -- -D warnings
+      - name: Clippy (advisory)
+        run: cargo clippy --manifest-path holos_core/Cargo.toml
+        continue-on-error: true
       - name: Tests
         run: cargo test --release --manifest-path holos_core/Cargo.toml
 

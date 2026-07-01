@@ -25,9 +25,9 @@
 #![forbid(unsafe_code)]
 
 mod bsc;
+pub mod map;
 mod memory;
 mod rng;
-pub mod map;
 
 pub use bsc::{bundle, permute, Hypervector};
 pub use memory::ItemMemory;
