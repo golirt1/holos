@@ -1,0 +1,20 @@
+[package]
+name = "holos_core"
+version = "0.1.0"
+edition = "2021"
+description = "Fast, dependency-free Hyperdimensional Computing (HDC / VSA) engine"
+license = "MIT"
+repository = "https://github.com/USER/holos"
+keywords = ["hyperdimensional", "vsa", "hdc", "machine-learning", "edge"]
+categories = ["science", "no-std"]
+
+[lib]
+name = "holos_core"
+
+# Sin dependencias: parte de la propuesta de valor (ligero y embebible).
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

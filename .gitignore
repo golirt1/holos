@@ -15,5 +15,5 @@ Thumbs.db
 # Claude Code local config
 .claude/
 
-# Rust (future native engine)
-/target/
+# Rust native engine build artifacts
+target/
