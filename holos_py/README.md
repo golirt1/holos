@@ -26,6 +26,6 @@ Why HOLOS: the bit-packed BSC engine makes `bind`/`similarity`/`cleanup` run as
 XOR + hardware popcount — **5–14× faster cleanup than optimized NumPy**, with **zero
 dependencies** and an embeddable native core (unlike PyTorch-based libraries).
 
-See the [project repository](https://github.com/USER/holos) for the full design.
+See the [project repository](https://github.com/golirt1/holos) for the full design.
 
 License: MIT.

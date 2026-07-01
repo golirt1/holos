@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 description = "Fast, dependency-free Hyperdimensional Computing (HDC / VSA) engine"
 license = "MIT"
-repository = "https://github.com/USER/holos"
+repository = "https://github.com/golirt1/holos"
 keywords = ["hyperdimensional", "vsa", "hdc", "machine-learning", "edge"]
 categories = ["science", "no-std"]
 

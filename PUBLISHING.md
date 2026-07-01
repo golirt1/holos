@@ -6,12 +6,12 @@ Everything below needs **your** accounts/tokens — these are the steps that onl
 
 ```bash
 # Create an empty repo at github.com (public or private), then:
-git remote add origin https://github.com/<YOUR_USER>/holos.git
+git remote add origin https://github.com/golirt1/holos.git
 git push -u origin main
 ```
 
 Before pushing, replace the `USER` placeholders:
-- `holos_core/Cargo.toml` → `repository = "https://github.com/<YOUR_USER>/holos"`
+- `holos_core/Cargo.toml` → `repository = "https://github.com/golirt1/holos"`
 - `holos_py/README.md` and `README.md` → repository links
 - `LICENSE` → confirm the copyright name
 
