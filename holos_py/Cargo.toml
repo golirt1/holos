@@ -1,0 +1,14 @@
+[package]
+name = "holos-py"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Python bindings for HOLOS — a fast, dependency-free HDC/VSA engine"
+
+[lib]
+name = "holos"
+crate-type = ["cdylib"]
+
+[dependencies]
+holos_core = { path = "../holos_core" }
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py39"] }

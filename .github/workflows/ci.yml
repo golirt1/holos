@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  test:
+    name: Test core (Rust)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Format check
+        run: cargo fmt --manifest-path holos_core/Cargo.toml -- --check
+      - name: Clippy
+        run: cargo clippy --manifest-path holos_core/Cargo.toml -- -D warnings
+      - name: Tests
+        run: cargo test --release --manifest-path holos_core/Cargo.toml
+
+  wheels:
+    name: Build wheels (${{ matrix.os }})
+    needs: test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --manifest-path holos_py/Cargo.toml -o dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist
+
+  # Publish to PyPI on version tags (requires PYPI_API_TOKEN secret).
+  publish:
+    name: Publish to PyPI
+    needs: wheels
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - name: Publish
+        uses: PyO3/maturin-action@v1
+        with:
+          command: upload
+          args: --skip-existing dist/*
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}

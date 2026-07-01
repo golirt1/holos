@@ -1,0 +1,22 @@
+[build-system]
+requires = ["maturin>=1.5,<2"]
+build-backend = "maturin"
+
+[project]
+name = "holos"
+version = "0.1.0"
+description = "Fast, dependency-free Hyperdimensional Computing (HDC / VSA) engine"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [{ name = "Javier Cabrera" }]
+keywords = ["hyperdimensional", "vsa", "hdc", "machine-learning", "edge"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
