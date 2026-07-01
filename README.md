@@ -43,6 +43,10 @@ Reproduce: `cargo run --release --example memoria` and `python prototipo_py/benc
 *(NumPy here is the optimized bit-packed approach with `np.bitwise_count`, not a naive baseline.
 A direct TorchHD comparison is future work — TorchHD requires PyTorch, the dependency HOLOS avoids.)*
 
+**Classification** — handwritten digits (8×8, 10 classes): **92.0%** one-shot, **95.6%** with adaptive
+retraining. Training is just counting bits; no GPU, no backprop. Reproduce:
+`cargo run --release --example digits`.
+
 ## Install
 
 **Rust:**
@@ -98,7 +102,7 @@ name, sim = mem.cleanup(bound.bind(role), threads=8)   # ("value", ~1.0)
 holos/
 ├── holos_core/          # the engine (Rust, zero dependencies)
 │   ├── src/             #   rng · bsc (bit-packed) · memory (cleanup) · map · encoder · classifier
-│   └── examples/        #   memoria, dolar_de_mexico, clasificador, bench
+│   └── examples/        #   memoria, dolar_de_mexico, clasificador, digits, bench
 ├── holos_py/            # Python bindings (PyO3 + maturin)
 ├── prototipo_py/        # NumPy reference prototypes (ground truth + benchmarks)
 ├── .github/workflows/   # CI: fmt/clippy/test + build wheels (linux/mac/win) + PyPI publish
