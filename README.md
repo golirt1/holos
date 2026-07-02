@@ -1,5 +1,9 @@
 # HOLOS
 
+[![Crates.io](https://img.shields.io/crates/v/holos_core.svg)](https://crates.io/crates/holos_core)
+[![docs.rs](https://img.shields.io/docsrs/holos_core)](https://docs.rs/holos_core)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **A fast, dependency-free Hyperdimensional Computing (HDC / VSA) engine** — native Rust core,
 Python bindings, runs on a CPU.
 
@@ -49,17 +53,16 @@ retraining. Training is just counting bits; no GPU, no backprop. Reproduce:
 
 ## Install
 
-**Rust:**
+**Rust** — published on crates.io: [crates.io/crates/holos_core](https://crates.io/crates/holos_core)
 ```bash
-cargo add holos_core   # once published; meanwhile use a git or path dependency
+cargo add holos_core
 ```
 
-**Python:**
+**Python** — bindings not yet published to PyPI; build from source for now:
 ```bash
-pip install holos       # once published on PyPI
-# or build from source:
 pip install maturin && maturin build --release --manifest-path holos_py/Cargo.toml
 ```
+(Package name on PyPI will be `holos-hdc`; the Python import stays `import holos`.)
 
 ## Usage
 
@@ -112,10 +115,12 @@ holos/
 
 ## Status & roadmap
 
-Working: native BSC + MAP algebra, associative-memory cleanup (serial + parallel + batched),
-serialization (save/load), a `LevelEncoder` and a one-shot `Classifier` (train = counting bits),
-Python bindings, CI, benchmarks. Next (see [design doc](HOLOS_investigacion_tecnica.md) §15):
+Published: [`holos_core` on crates.io](https://crates.io/crates/holos_core). Working: native BSC +
+MAP algebra, associative-memory cleanup (serial + parallel + batched), serialization (save/load), a
+`LevelEncoder` and a one-shot `Classifier` (train = counting bits), Python bindings (not yet on
+PyPI), CI, benchmarks. Next (see [design doc](HOLOS_investigacion_tecnica.md) §15):
 
+- Publish the Python bindings to PyPI as `holos-hdc` (see [PUBLISHING.md](PUBLISHING.md)).
 - Trainable / adaptive **encoders** — the field's central open problem, and the path to closing
   the accuracy gap with deep learning.
 - Batched / streaming APIs and a persistent thread pool for cleanup.
