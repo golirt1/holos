@@ -3,7 +3,7 @@ requires = ["maturin>=1.5,<2"]
 build-backend = "maturin"
 
 [project]
-name = "holos"
+name = "holos-hdc"
 version = "0.1.0"
 description = "Fast, dependency-free Hyperdimensional Computing (HDC / VSA) engine"
 readme = "README.md"
